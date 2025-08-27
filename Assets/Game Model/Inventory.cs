@@ -1,0 +1,65 @@
+// Inventory.cs
+using UnityEngine;
+
+public class Inventory : MonoBehaviour
+{
+	[SerializeField] int size = 10;
+	[SerializeField] ItemStack[] slots;
+
+	public int Size => size;
+	public ItemStack Get(int i) => slots[i];
+	public void Set(int i, ItemStack s) => slots[i] = s;
+
+	void OnValidate()
+	{
+		if (slots == null || slots.Length != size)
+			slots = new ItemStack[size];
+	}
+
+	// Merge hand into slot
+	public void TryPlaceFromHand(int index, ref ItemStack hand)
+	{
+		var slot = slots[index];
+
+		if (hand.IsEmpty) // pick up (swap)
+		{
+			slots[index] = ItemStack.Empty;
+			hand = slot;
+			return;
+		}
+
+		if (slot.IsEmpty) // drop whole hand
+		{
+			slots[index] = hand;
+			hand = ItemStack.Empty;
+			return;
+		}
+
+		if (slot.item == hand.item) // merge into slot
+		{
+			int added = slot.AddUpTo(hand.count);
+			hand.count -= added;
+			slots[index] = slot;
+			if (hand.count <= 0) hand = ItemStack.Empty;
+			return;
+		}
+
+		// different items -> swap
+		slots[index] = hand;
+		hand = slot;
+	}
+
+	// Take up to 'n' items out of slot (for splitting to hand)
+	public ItemStack TakeFromSlot(int index, int n)
+	{
+		var slot = slots[index];
+		if (slot.IsEmpty || n <= 0) return ItemStack.Empty;
+
+		int take = Mathf.Min(slot.count, n);
+		var outStack = new ItemStack { item = slot.item, count = take };
+		slot.count -= take;
+		if (slot.count <= 0) slot.Clear();
+		slots[index] = slot;
+		return outStack;
+	}
+}
