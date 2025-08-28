@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c5d60fd1eb8c8a4e833f6d4341b52d8, type: 3}
-  m_Name: Arrow
+  m_Name: Arrowhead
   m_EditorClassIdentifier: 
-  DisplayName: Arrow
-  Icon: {fileID: 21300000, guid: b81952f5fd5834b47856f5af824e088d, type: 3}
-  Prefab: {fileID: 919132149155446097, guid: c422eb69b31a4f64b984939824c82613, type: 3}
-  MaxStack: 20
+  DisplayName: Arrowhead
+  Icon: {fileID: 21300000, guid: 8299f32e6bb4ae741b8da0ad2a1043b5, type: 3}
+  Prefab: {fileID: 6395604606298912055, guid: 1b6bf6a1f07cb2f4b92f9f589f005ece, type: 3}
+  MaxStack: 10

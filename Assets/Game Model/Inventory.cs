@@ -6,6 +6,8 @@ public class Inventory : MonoBehaviour
 	[SerializeField] int size = 10;
 	[SerializeField] ItemStack[] slots;
 
+	[SerializeField] int outputSlotIndex = -1;
+
 	public int Size => size;
 	public ItemStack Get(int i) => slots[i];
 	public void Set(int i, ItemStack s) => slots[i] = s;
@@ -19,6 +21,9 @@ public class Inventory : MonoBehaviour
 	// Merge hand into slot
 	public void TryPlaceFromHand(int index, ref ItemStack hand)
 	{
+		if (index == outputSlotIndex)
+			return;
+
 		var slot = slots[index];
 
 		if (hand.IsEmpty) // pick up (swap)

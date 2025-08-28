@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DisplayName: Metal Stick
   Icon: {fileID: 21300000, guid: dc09e49449e1ece45ba97b9b6043990b, type: 3}
-  Prefab: {fileID: 919132149155446097, guid: 53f29616ec9a96249b74f55c4c10e7c0, type: 3}
-  MaxStack: 20
+  Prefab: {fileID: 348286030074394513, guid: 204c214bc4ab044469cf5bb9007a26df, type: 3}
+  MaxStack: 10

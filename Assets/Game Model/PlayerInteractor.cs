@@ -1,4 +1,6 @@
 // PlayerInteractor.cs
+using Cinemachine;
+using StarterAssets;
 using UnityEngine;
 
 public class PlayerInteractor : MonoBehaviour
@@ -10,17 +12,22 @@ public class PlayerInteractor : MonoBehaviour
 
 	[Header("Movement Freeze")]
 	[Tooltip("Movement scripts to disable while UI is open (e.g., your FPS controller, look, etc.).")]
-	[SerializeField] MonoBehaviour[] movementScriptsToDisable;
+	[SerializeField] GameObject playerCapsule;
 
 	[Header("UI Prompt (optional)")]
 	[SerializeField] GameObject prompt; // "Press E"
 
 	WorldContainer lookedAt;
 
+	private Vector3 savedPos;
+	private Vector3 savedRot;
+
 	void Update()
 	{
 		if (ContainerPanelUI.I.IsOpen)
 		{
+			if (prompt) prompt.SetActive(false);
+
 			// While open, allow close with E or Escape
 			if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Escape))
 				CloseUI();
@@ -44,11 +51,21 @@ public class PlayerInteractor : MonoBehaviour
 		SetMovementEnabled(false);
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
+
+		savedPos = cam.transform.position;
+		savedRot = cam.transform.eulerAngles;
+
+		cam.transform.position = container.PoV.position;
+		cam.transform.eulerAngles = container.PoV.eulerAngles;
 	}
 
 	void CloseUI()
 	{
 		ContainerPanelUI.I.Close();
+
+		cam.transform.position = savedPos;
+		cam.transform.eulerAngles = savedRot;
+
 		SetMovementEnabled(true);
 		Cursor.visible = false;
 		Cursor.lockState = CursorLockMode.Locked;
@@ -56,7 +73,8 @@ public class PlayerInteractor : MonoBehaviour
 
 	void SetMovementEnabled(bool enabled)
 	{
-		foreach (var m in movementScriptsToDisable)
-			if (m) m.enabled = enabled;
+		GetComponent<CinemachineBrain>().enabled = enabled;
+		playerCapsule.GetComponent<CharacterController>().enabled = enabled;
+		playerCapsule.GetComponent<FirstPersonController>().enabled = enabled;
 	}
 }

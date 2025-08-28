@@ -12,6 +12,8 @@ public class ContainerPanelUI : MonoBehaviour
 	[SerializeField] Transform slotsParent; // e.g., a GridLayoutGroup
 	[SerializeField] InventorySlotUI slotPrefab;
 
+	[SerializeField] RecipeSelectionUi reciptPrefab;
+
 	Inventory current;
 
 	void Awake()

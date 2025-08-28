@@ -10,7 +10,7 @@ public class DemoBootstrap : MonoBehaviour
 	void Start()
 	{
 		// Put some starter items in the first slots
-		playerInv.Set(0, new ItemStack { item = metalStick, count = 17 });
-		playerInv.Set(1, new ItemStack { item = arrowhead, count = 12 });
+		playerInv.Set(0, new ItemStack { item = metalStick, count = 8 });
+		playerInv.Set(1, new ItemStack { item = arrowhead, count = 7 });
 	}
 }
