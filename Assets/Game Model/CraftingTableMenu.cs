@@ -21,10 +21,13 @@ public class CraftingTableMenu : MonoBehaviour
 	Inventory current;
 	WorldCraftingBench bench;
 
+	private int blueprintLayer;
+
 	void Awake()
 	{
 		I = this;
 		root.SetActive(false);
+		blueprintLayer = LayerMask.NameToLayer("PickupDropPoints");
 	}
 
 	public void Open(WorldCraftingBench bench)
@@ -71,7 +74,10 @@ public class CraftingTableMenu : MonoBehaviour
 		spawnedRecipeItem = GameObject.Instantiate(recipe.Prefab, bench.BuildTransform);
 
 		foreach (var comp in spawnedRecipeItem.GetComponentsInChildren<ItemComponent>())
+		{
 			comp.ShowAsBlueprint(true);
+			comp.gameObject.layer = blueprintLayer;
+		}
 
 		for (int i = recipesParent.childCount - 1; i >= 0; i--)
 			Destroy(recipesParent.GetChild(i).gameObject);

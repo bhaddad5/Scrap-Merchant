@@ -78,7 +78,8 @@ public class SlotRowVisualizer : MonoBehaviour
 			go.transform.localEulerAngles = itemLocalEuler;
 			go.transform.localScale = itemLocalScale;
 
-			go.AddComponent<PickUp>();
+			var pickupScript = go.AddComponent<PickUp>();
+			pickupScript.MyItemType = stack.item;
 
 			//Destroy all the child-colliders, we only wanna grab the whole object
 			var colliders = go.GetComponentsInChildren<Collider>();
