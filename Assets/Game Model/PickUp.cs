@@ -87,7 +87,7 @@ public class PickUp : MonoBehaviour
 		if (blueprintMask != 0 &&
 			Physics.Raycast(ray, out RaycastHit snapHit, 1000f, blueprintMask, QueryTriggerInteraction.Collide))
 		{
-			currentContainer = snapHit.collider.GetComponent<SlotRowVisualizer>();
+			currentContainer = snapHit.collider.GetComponentInParent<SlotRowVisualizer>();
 
 			if (currentContainer && IsNewItem && currentContainer.inventory.outputSlotIndex != currentContainer.slotIndex)
 				currentContainer = null;

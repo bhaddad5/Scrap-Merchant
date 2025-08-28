@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c5d60fd1eb8c8a4e833f6d4341b52d8, type: 3}
-  m_Name: Cannister
+  m_Name: Wood Stick
   m_EditorClassIdentifier: 
-  DisplayName: Cannister
+  DisplayName: Wooden Stick
   Icon: {fileID: 0}
-  Prefab: {fileID: 0}
-  MaxStack: 5
+  Prefab: {fileID: 8272893456892026749, guid: b834d4326a87aab4bab50754363230fc, type: 3}
+  MaxStack: 15
