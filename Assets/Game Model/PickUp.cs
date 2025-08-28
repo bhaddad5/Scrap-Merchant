@@ -1,86 +1,116 @@
-// PickUp.cs
+// PickUpOnXZPlane.cs
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[RequireComponent(typeof(Collider))]
+[DisallowMultipleComponent]
 public class PickUp : MonoBehaviour
 {
-	[Header("Holding")]
-	public Transform holdPoint;         // Optional: set to a child of the camera (e.g., "HoldPoint")
-	public float holdDistance = 2.0f;   // Used if holdPoint is null (in front of camera)
-	public float followLerp = 18f;      // Higher = snappier follow
-	public bool alignRotation = true;   // Face same rotation as camera / holdPoint while held
-
-	[Header("Physics")]
+	[Header("Motion")]
+	[Tooltip("How snappy the object follows the mouse intersection on the XZ plane.")]
+	public float followLerp = 20f;
+	[Tooltip("Freeze rotation while held.")]
 	public bool freezeRotationWhileHeld = true;
-	public float dropForwardImpulse = 0f; // e.g., 1.5f to toss a bit forward on drop
+
+	[Header("Drop")]
+	[Tooltip("Optional small forward push on drop.")]
+	public float dropForwardImpulse = 0f;
 
 	Camera cam;
 	Rigidbody rb;
+
+	// Drag/hold state
 	bool isHeld;
+	Plane dragPlane;          // world XZ plane at the object's pickup height (Y)
+	float planeY;             // constant Y while dragging
+	Vector3 offsetXZ;         // world-space XZ offset so it doesn't snap to cursor
+	Transform prevParent;
+
+	// Original physics state
+	bool hadRB;
+	bool prevUseGravity;
+	bool prevIsKinematic;
+	RigidbodyConstraints prevConstraints;
 
 	void Awake()
 	{
-		GetComponent<Collider>().enabled = true;
-
 		cam = Camera.main;
+
+		// Remember existing rigidbody state if present
+		rb = GetComponent<Rigidbody>();
+		hadRB = rb != null;
+		if (rb)
+		{
+			prevUseGravity = rb.useGravity;
+			prevIsKinematic = rb.isKinematic;
+			prevConstraints = rb.constraints;
+		}
 	}
 
-	void LateUpdate()
+	void Update()
 	{
 		if (!isHeld) return;
 
-		// Target position/rotation to follow
-		Vector3 targetPos;
-		Quaternion targetRot;
-
-		if (holdPoint)
+		// Allow dropping even if the cursor isn't over the object anymore
+		if (Input.GetMouseButtonUp(0))
 		{
-			targetPos = holdPoint.position;
-			targetRot = holdPoint.rotation;
-		}
-		else
-		{
-			if (!cam) cam = Camera.main;
-			var origin = cam ? cam.transform : transform;
-			targetPos = origin.position + origin.forward * holdDistance;
-			targetRot = origin.rotation;
+			Drop();
+			return;
 		}
 
-		// Smoothly move/rotate while kinematic
-		transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followLerp);
-		if (alignRotation)
-			transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * followLerp);
+		// Compute intersection point of mouse ray with the drag plane
+		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+		if (dragPlane.Raycast(ray, out float enter))
+		{
+			Vector3 hit = ray.GetPoint(enter);         // point on plane
+			Vector3 target = new Vector3(hit.x + offsetXZ.x, planeY, hit.z + offsetXZ.z);
+
+			// Smoothly move toward target; Y remains fixed at planeY
+			transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * followLerp);
+		}
 	}
 
 	void OnMouseDown()
 	{
-		Debug.Log("Mouse Down!");
-
 		// Ignore clicks through UI
 		if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return;
 
-		// Ensure we have a Rigidbody
+		// Ensure a Rigidbody exists
 		if (!rb) rb = gameObject.AddComponent<Rigidbody>();
 
-		// Prep for holding
+		prevParent = transform.parent;
+
+		// Store original physics
+		prevUseGravity = rb.useGravity;
+		prevIsKinematic = rb.isKinematic;
+		prevConstraints = rb.constraints;
+
+		// Prep physics for manual motion
 		rb.useGravity = false;
-		rb.isKinematic = true; // we'll manually move it
+		rb.isKinematic = true;
 		if (freezeRotationWhileHeld) rb.constraints |= RigidbodyConstraints.FreezeRotation;
 
-		// Optionally parent to holdPoint so it also follows if that moves
-		if (holdPoint) transform.SetParent(holdPoint, true);
+		// Build the drag plane at the current Y (world XZ plane)
+		planeY = transform.position.y;
+		dragPlane = new Plane(Vector3.up, new Vector3(0f, planeY, 0f));
+
+		// Compute XZ offset so the pivot doesn't snap to the cursor
+		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+		if (dragPlane.Raycast(ray, out float enter))
+		{
+			Vector3 hit = ray.GetPoint(enter);
+			offsetXZ = new Vector3(transform.position.x - hit.x, 0f, transform.position.z - hit.z);
+		}
+		else
+		{
+			offsetXZ = Vector3.zero; // fallback, rare (camera perfectly parallel)
+		}
 
 		isHeld = true;
 	}
 
-	void OnMouseUp()
-	{
-		Drop();
-	}
-
 	void OnDisable()
 	{
-		// Safety: if it gets disabled while held, drop and restore
 		if (isHeld) Drop();
 	}
 
@@ -88,11 +118,15 @@ public class PickUp : MonoBehaviour
 	{
 		isHeld = false;
 
-		// Restore physics (or make it fall if it didn't have RB before)
-		if (rb)
-		{
+		if (!rb) return;
 
-			Rigidbody.Destroy(rb);
-		}
+		// Restore physics
+		rb.isKinematic = false;
+		rb.useGravity = true;
+		rb.constraints = prevConstraints;
+
+		// Optional small forward toss
+		if (dropForwardImpulse > 0f)
+			rb.AddForce((cam ? cam.transform.forward : transform.forward) * dropForwardImpulse, ForceMode.VelocityChange);
 	}
 }

@@ -80,6 +80,14 @@ public class SlotRowVisualizer : MonoBehaviour
 
 			go.AddComponent<PickUp>();
 
+			//Destroy all the child-colliders, we only wanna grab the whole object
+			var colliders = go.GetComponentsInChildren<Collider>();
+			for(int c = 0; c < colliders.Length; c++)
+			{
+				if (c != 0)
+					Collider.Destroy(colliders[c]);
+			}
+
 			// Ensure physics/interaction won’t mess with your scene preview
 			DisablePhysics(go);
 
@@ -119,7 +127,5 @@ public class SlotRowVisualizer : MonoBehaviour
 	{
 		var rb = go.GetComponent<Rigidbody>();
 		if (rb) { rb.isKinematic = true; rb.useGravity = false; }
-		//foreach (var col in go.GetComponentsInChildren<Collider>(true))
-		//	col.enabled = false;
 	}
 }
