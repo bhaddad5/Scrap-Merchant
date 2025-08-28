@@ -24,7 +24,7 @@ public class PlayerInteractor : MonoBehaviour
 
 	void Update()
 	{
-		if (ContainerPanelUI.I.IsOpen)
+		if (ContainerPanelUI.I.IsOpen || CraftingTableMenu.I.IsOpen)
 		{
 			if (prompt) prompt.SetActive(false);
 
@@ -47,7 +47,11 @@ public class PlayerInteractor : MonoBehaviour
 
 	void OpenUI(WorldContainer container)
 	{
-		ContainerPanelUI.I.Open(container.Inventory, container.displayName);
+		if (container is WorldCraftingBench craftingBench)
+			CraftingTableMenu.I.Open(craftingBench);
+		else
+			ContainerPanelUI.I.Open(container);
+
 		SetMovementEnabled(false);
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
@@ -62,6 +66,7 @@ public class PlayerInteractor : MonoBehaviour
 	void CloseUI()
 	{
 		ContainerPanelUI.I.Close();
+		CraftingTableMenu.I.Close();
 
 		cam.transform.position = savedPos;
 		cam.transform.eulerAngles = savedRot;

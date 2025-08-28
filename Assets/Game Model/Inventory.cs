@@ -1,4 +1,5 @@
 // Inventory.cs
+using System;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -11,6 +12,8 @@ public class Inventory : MonoBehaviour
 	public int Size => size;
 	public ItemStack Get(int i) => slots[i];
 	public void Set(int i, ItemStack s) => slots[i] = s;
+
+	public event Action OnInventoryUpdated;
 
 	void OnValidate()
 	{
@@ -30,6 +33,7 @@ public class Inventory : MonoBehaviour
 		{
 			slots[index] = ItemStack.Empty;
 			hand = slot;
+			OnInventoryUpdated?.Invoke();
 			return;
 		}
 
@@ -37,6 +41,7 @@ public class Inventory : MonoBehaviour
 		{
 			slots[index] = hand;
 			hand = ItemStack.Empty;
+			OnInventoryUpdated?.Invoke();
 			return;
 		}
 
@@ -46,12 +51,14 @@ public class Inventory : MonoBehaviour
 			hand.count -= added;
 			slots[index] = slot;
 			if (hand.count <= 0) hand = ItemStack.Empty;
+			OnInventoryUpdated?.Invoke();
 			return;
 		}
 
 		// different items -> swap
 		slots[index] = hand;
 		hand = slot;
+		OnInventoryUpdated?.Invoke();
 	}
 
 	// Take up to 'n' items out of slot (for splitting to hand)
@@ -65,6 +72,7 @@ public class Inventory : MonoBehaviour
 		slot.count -= take;
 		if (slot.count <= 0) slot.Clear();
 		slots[index] = slot;
+		OnInventoryUpdated?.Invoke();
 		return outStack;
 	}
 }
