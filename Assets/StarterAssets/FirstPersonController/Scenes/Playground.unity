@@ -494,12 +494,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 9186289942143365268}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &700780709 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3492886775509908117, guid: c7fc68d20b28cc94bb1145df11cb8835,
-    type: 3}
-  m_PrefabInstance: {fileID: 3978271281588340621}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &746329221
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1899,26 +1893,11 @@ PrefabInstance:
       propertyPath: itemLocalEuler.y
       value: 30
       objectReference: {fileID: 0}
-    - target: {fileID: 5583351737066622995, guid: c7fc68d20b28cc94bb1145df11cb8835,
-        type: 3}
-      propertyPath: size
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5583351737066622995, guid: c7fc68d20b28cc94bb1145df11cb8835,
-        type: 3}
-      propertyPath: slots.Array.size
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 6783510714676833962, guid: c7fc68d20b28cc94bb1145df11cb8835,
         type: 3}
       propertyPath: m_Name
       value: Test Craft Table
       objectReference: {fileID: 0}
-    - target: {fileID: 7623361270297377527, guid: c7fc68d20b28cc94bb1145df11cb8835,
-        type: 3}
-      propertyPath: PoV
-      value: 
-      objectReference: {fileID: 700780709}
     - target: {fileID: 8373479606301354034, guid: c7fc68d20b28cc94bb1145df11cb8835,
         type: 3}
       propertyPath: m_LocalPosition.x

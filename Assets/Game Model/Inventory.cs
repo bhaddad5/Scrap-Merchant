@@ -1,6 +1,8 @@
 // Inventory.cs
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class Inventory : MonoBehaviour
 {
@@ -24,9 +26,6 @@ public class Inventory : MonoBehaviour
 	// Merge hand into slot
 	public void TryPlaceFromHand(int index, ref ItemStack hand)
 	{
-		if (index == outputSlotIndex)
-			return;
-
 		var slot = slots[index];
 
 		if (hand.IsEmpty) // pick up (swap)
@@ -36,6 +35,9 @@ public class Inventory : MonoBehaviour
 			OnInventoryUpdated?.Invoke();
 			return;
 		}
+
+		if (index == outputSlotIndex)
+			return;
 
 		if (slot.IsEmpty) // drop whole hand
 		{
@@ -61,6 +63,25 @@ public class Inventory : MonoBehaviour
 		OnInventoryUpdated?.Invoke();
 	}
 
+	public void PlaceInSlot(int slotId, ItemStack stack)
+	{
+		var slot = Get(slotId);
+
+		if (slot.IsEmpty) // drop whole hand
+		{
+			slots[slotId] = stack;
+			stack = ItemStack.Empty;
+			OnInventoryUpdated?.Invoke();
+			return;
+		}
+
+		int added = slot.AddUpTo(stack.count);
+		stack.count -= added;
+		slots[slotId] = slot;
+		if (stack.count <= 0) stack = ItemStack.Empty;
+		OnInventoryUpdated?.Invoke();
+	}
+
 	// Take up to 'n' items out of slot (for splitting to hand)
 	public ItemStack TakeFromSlot(int index, int n)
 	{
@@ -74,5 +95,22 @@ public class Inventory : MonoBehaviour
 		slots[index] = slot;
 		OnInventoryUpdated?.Invoke();
 		return outStack;
+	}
+
+	public bool ContainsItem(Item item)
+	{
+		for (int i = 0; i < Size; i++)
+		{
+			var s = Get(i);
+			if (!s.IsEmpty && s.item == item && s.count > 0)
+				return true;
+		}
+		return false;
+	}
+
+	public bool SlotCanAcceptItem(int slotIndex, Item item, int count)
+	{
+		var s = Get(slotIndex);
+		return s.IsEmpty || (s.item == item && s.count + count <= s.item.MaxStack);
 	}
 }

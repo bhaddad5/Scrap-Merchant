@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 7473423462334000839}
   - component: {fileID: 8540088118241623911}
   - component: {fileID: 4489256572570616009}
-  m_Layer: 0
+  - component: {fileID: 1914085673449133421}
+  m_Layer: 10
   m_Name: Slot Display (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,10 +61,31 @@ MonoBehaviour:
   contentRoot: {fileID: 7580585233060205658}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &1914085673449133421
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13463763669435024}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &33598018241527351
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,7 +97,8 @@ GameObject:
   - component: {fileID: 5093398591647768890}
   - component: {fileID: 4613917803646985018}
   - component: {fileID: 4661270379254229931}
-  m_Layer: 0
+  - component: {fileID: 6569050227372731240}
+  m_Layer: 10
   m_Name: Slot Display (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,10 +147,31 @@ MonoBehaviour:
   contentRoot: {fileID: 7731564119904467616}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &6569050227372731240
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33598018241527351}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &332981933682397950
 GameObject:
   m_ObjectHideFlags: 0
@@ -139,7 +183,7 @@ GameObject:
   - component: {fileID: 2810415853864597749}
   - component: {fileID: 4845414952523264321}
   - component: {fileID: 680637829582255028}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6054127919165493853}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -284,7 +328,7 @@ GameObject:
   - component: {fileID: 3112003949244526580}
   - component: {fileID: 1117857548338396148}
   - component: {fileID: 6183833679939034166}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -365,7 +409,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7731564119904467616}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -398,7 +442,8 @@ GameObject:
   - component: {fileID: 5083877389447850987}
   - component: {fileID: 6919466564166968883}
   - component: {fileID: 5370089949616684115}
-  m_Layer: 0
+  - component: {fileID: 1708609070783414288}
+  m_Layer: 10
   m_Name: Slot Display (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -447,10 +492,31 @@ MonoBehaviour:
   contentRoot: {fileID: 369738873270151969}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &1708609070783414288
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758074272833682253}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2617122665156281718
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,7 +528,7 @@ GameObject:
   - component: {fileID: 1714573358888562536}
   - component: {fileID: 1622847917454248966}
   - component: {fileID: 6974785674362622979}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -545,7 +611,7 @@ GameObject:
   - component: {fileID: 6320279722094474474}
   - component: {fileID: 304725326689738486}
   - component: {fileID: 1558224632092964785}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -628,7 +694,8 @@ GameObject:
   - component: {fileID: 6158622874256910443}
   - component: {fileID: 6104453605680960882}
   - component: {fileID: 4755128073352613229}
-  m_Layer: 0
+  - component: {fileID: 3175112512729795604}
+  m_Layer: 10
   m_Name: Slot Display (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -677,10 +744,31 @@ MonoBehaviour:
   contentRoot: {fileID: 5887293260717262187}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &3175112512729795604
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717230705918613843}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4973985682314481031
 GameObject:
   m_ObjectHideFlags: 0
@@ -690,7 +778,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7580585233060205658}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -721,7 +809,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8934155501375722087}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -754,7 +842,7 @@ GameObject:
   - component: {fileID: 3735273120721574974}
   - component: {fileID: 8813333925453477485}
   - component: {fileID: 1765992674495570617}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -837,7 +925,8 @@ GameObject:
   - component: {fileID: 5157339526324594502}
   - component: {fileID: 429505006680458341}
   - component: {fileID: 8887414982492645997}
-  m_Layer: 0
+  - component: {fileID: 1887744397844638350}
+  m_Layer: 10
   m_Name: Slot Display (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -886,10 +975,31 @@ MonoBehaviour:
   contentRoot: {fileID: 6054127919165493853}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &1887744397844638350
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6630887692207801560}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6670057787776365821
 GameObject:
   m_ObjectHideFlags: 0
@@ -899,7 +1009,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 369738873270151969}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1047,7 +1157,7 @@ GameObject:
   - component: {fileID: 471655462443162778}
   - component: {fileID: 8584229387835960336}
   - component: {fileID: 9187125751152923016}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1128,7 +1238,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5887293260717262187}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1275,7 +1385,8 @@ GameObject:
   - component: {fileID: 2085616033874971307}
   - component: {fileID: 5341845736651031212}
   - component: {fileID: 4224784472337979834}
-  m_Layer: 0
+  - component: {fileID: 4407412131586182185}
+  m_Layer: 10
   m_Name: Slot Display
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1324,7 +1435,28 @@ MonoBehaviour:
   contentRoot: {fileID: 8934155501375722087}
   maxWidth: 0.3
   startLocalOffset: {x: 0, y: 0, z: 0}
-  itemLocalEuler: {x: 0, y: 0, z: 0}
+  itemLocalEuler: {x: 0, y: 30, z: 0}
   itemLocalScale: {x: 1, y: 1, z: 1}
   autoRebuild: 1
   hideWhenEmpty: 0
+--- !u!65 &4407412131586182185
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9102912031463385293}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3, y: 0.1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}

@@ -131,21 +131,9 @@ public class CraftingTableMenu : MonoBehaviour
 		}
 
 		foreach (var neededItem in needed)
-			if (!ContainsItem(inventory, neededItem))
+			if (!inventory.ContainsItem(neededItem))
 				return false;
 
 		return true;
-	}
-
-	private bool ContainsItem(Inventory inv, Item item)
-	{
-		if (inv == null || item == null) return false;
-		for (int i = 0; i < inv.Size; i++)
-		{
-			var s = inv.Get(i);
-			if (!s.IsEmpty && s.item == item && s.count > 0)
-				return true;
-		}
-		return false;
-	}
+	}	
 }

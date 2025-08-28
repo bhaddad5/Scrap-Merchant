@@ -80,6 +80,7 @@ public class SlotRowVisualizer : MonoBehaviour
 
 			var pickupScript = go.AddComponent<PickUp>();
 			pickupScript.MyItemType = stack.item;
+			pickupScript.StartingContainerIndex = slotIndex;
 
 			//Destroy all the child-colliders, we only wanna grab the whole object
 			var colliders = go.GetComponentsInChildren<Collider>();

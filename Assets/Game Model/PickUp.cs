@@ -21,6 +21,7 @@ public class PickUp : MonoBehaviour
 	public bool snapAlignRotation = true;
 
 	public Item MyItemType;
+	public int StartingContainerIndex;
 
 	Camera cam;
 	Rigidbody rb;
@@ -40,6 +41,7 @@ public class PickUp : MonoBehaviour
 	// Snapping state
 	int blueprintMask;
 	ItemComponent currentSnapTarget;  // null when not snapping
+	SlotRowVisualizer currentContainer;
 
 	private bool firstPickup = true;
 	private float firstY = 0;
@@ -78,13 +80,14 @@ public class PickUp : MonoBehaviour
 		// Ray from mouse for snapping and/or plane dragging
 		Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 
-		Debug.Log(currentSnapTarget?.name);
-
 		// Try to snap to a matching ItemComponent on ItemBlueprints layer
 		ItemComponent newSnap = null;
+		currentContainer = null;
 		if (blueprintMask != 0 &&
 			Physics.Raycast(ray, out RaycastHit snapHit, 1000f, blueprintMask, QueryTriggerInteraction.Collide))
 		{
+			currentContainer = snapHit.collider.GetComponent<SlotRowVisualizer>();
+
 			// Get ItemComponent on the hit object (or its parents)
 			newSnap = snapHit.collider.GetComponent<ItemComponent>();
 			if (!newSnap) newSnap = snapHit.collider.GetComponentInParent<ItemComponent>();
@@ -176,16 +179,32 @@ public class PickUp : MonoBehaviour
 
 	void Drop()
 	{
+		isHeld = false;
+
 		if (currentSnapTarget)
 		{
 			currentSnapTarget.ShowAsBlueprint(false);
 			GameObject.Destroy(gameObject);
 
+			currentContainer = null;
+			currentSnapTarget = null;
+
 			return;
 		}
 
-		isHeld = false;
-		currentSnapTarget = null;
+		if(currentContainer && currentContainer.inventory.SlotCanAcceptItem(currentContainer.slotIndex, MyItemType, 1))
+		{
+			var itemGrab = currentContainer.inventory.TakeFromSlot(StartingContainerIndex, 1);
+			currentContainer.inventory.PlaceInSlot(currentContainer.slotIndex, itemGrab);
+
+			GameObject.Destroy(gameObject);
+
+			currentContainer = null;
+			currentSnapTarget = null;
+
+			return;
+		}
+		
 
 		if (!rb) return;
 
