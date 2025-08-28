@@ -54,6 +54,12 @@ public class CraftingTableMenu : MonoBehaviour
 
 	public void Close()
 	{
+		if (bench)
+		{
+			foreach (var inventorySlot in bench.GetComponentsInChildren<SlotRowVisualizer>())
+				inventorySlot.Rebuild();
+		}
+
 		if(current)
 			current.OnInventoryUpdated -= UpdateRecipesSelection;
 		ClearSelectedRecipe();
