@@ -17,4 +17,15 @@ public class ItemComponent : MonoBehaviour
     {
 		GetComponent<Renderer>().material = showBp ? DataLookup.I.BlueprintGridMat : myMat;
     }
+
+	public bool Ready { get; set; }
+	public int SrcInventorySlot { get; set; }
+
+	public void MarkReady(int srcInventorySlot)
+	{
+		Ready = true;
+		SrcInventorySlot = srcInventorySlot;
+
+		transform.GetComponentInParent<ItemBuildHandler>().CheckBuildComplete();
+	}
 }

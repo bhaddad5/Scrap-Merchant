@@ -9,7 +9,7 @@ public class Inventory : MonoBehaviour
 	[SerializeField] int size = 10;
 	[SerializeField] ItemStack[] slots;
 
-	[SerializeField] int outputSlotIndex = -1;
+	[SerializeField] public int outputSlotIndex = -1;
 
 	public int Size => size;
 	public ItemStack Get(int i) => slots[i];

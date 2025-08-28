@@ -78,6 +78,8 @@ public class CraftingTableMenu : MonoBehaviour
 		selectedRecipe = recipe;
 
 		spawnedRecipeItem = GameObject.Instantiate(recipe.Prefab, bench.BuildTransform);
+		var buildHandler = spawnedRecipeItem.AddComponent<ItemBuildHandler>();
+		buildHandler.MyItemType = recipe;
 
 		foreach (var comp in spawnedRecipeItem.GetComponentsInChildren<ItemComponent>())
 		{

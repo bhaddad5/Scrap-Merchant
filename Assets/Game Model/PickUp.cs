@@ -20,8 +20,9 @@ public class PickUp : MonoBehaviour
 	[Tooltip("Align rotation to the ItemComponent transform while snapped.")]
 	public bool snapAlignRotation = true;
 
-	public Item MyItemType;
-	public int StartingContainerIndex;
+	public Item MyItemType { get; set; }
+	public int StartingContainerIndex { get; set; }
+	public bool IsNewItem { get; set; }
 
 	Camera cam;
 	Rigidbody rb;
@@ -87,6 +88,11 @@ public class PickUp : MonoBehaviour
 			Physics.Raycast(ray, out RaycastHit snapHit, 1000f, blueprintMask, QueryTriggerInteraction.Collide))
 		{
 			currentContainer = snapHit.collider.GetComponent<SlotRowVisualizer>();
+
+			if (currentContainer && IsNewItem && currentContainer.inventory.outputSlotIndex != currentContainer.slotIndex)
+				currentContainer = null;
+			if (currentContainer && !IsNewItem && currentContainer.inventory.outputSlotIndex == currentContainer.slotIndex)
+				currentContainer = null;
 
 			// Get ItemComponent on the hit object (or its parents)
 			newSnap = snapHit.collider.GetComponent<ItemComponent>();
@@ -184,6 +190,7 @@ public class PickUp : MonoBehaviour
 		if (currentSnapTarget)
 		{
 			currentSnapTarget.ShowAsBlueprint(false);
+			currentSnapTarget.MarkReady(StartingContainerIndex);
 			GameObject.Destroy(gameObject);
 
 			currentContainer = null;
@@ -194,8 +201,17 @@ public class PickUp : MonoBehaviour
 
 		if(currentContainer && currentContainer.inventory.SlotCanAcceptItem(currentContainer.slotIndex, MyItemType, 1))
 		{
-			var itemGrab = currentContainer.inventory.TakeFromSlot(StartingContainerIndex, 1);
-			currentContainer.inventory.PlaceInSlot(currentContainer.slotIndex, itemGrab);
+			if (IsNewItem)
+			{
+				foreach(var component in GetComponentsInChildren<ItemComponent>())
+					currentContainer.inventory.TakeFromSlot(component.SrcInventorySlot, 1);
+				currentContainer.inventory.PlaceInSlot(currentContainer.slotIndex, new ItemStack() { count = 1, item = MyItemType});
+			}
+			else
+			{
+				var itemGrab = currentContainer.inventory.TakeFromSlot(StartingContainerIndex, 1);
+				currentContainer.inventory.PlaceInSlot(currentContainer.slotIndex, itemGrab);
+			}
 
 			GameObject.Destroy(gameObject);
 
