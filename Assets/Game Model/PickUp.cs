@@ -2,9 +2,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(Collider))]
 [DisallowMultipleComponent]
-public class PickUp : MonoBehaviour
+public class PickUp : MonoBehaviour, IChildClickReciever
 {
 	[Header("Motion")]
 	[Tooltip("How snappy the object follows the mouse intersection on the XZ plane or snap target.")]
@@ -134,7 +133,7 @@ public class PickUp : MonoBehaviour
 		transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * followLerp);
 	}
 
-	void OnMouseDown()
+	void IChildClickReciever.RecvOnMouseDown()
 	{
 		if (firstPickup)
 		{

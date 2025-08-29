@@ -59,8 +59,11 @@ public class PlayerInteractor : MonoBehaviour
 		savedPos = cam.transform.position;
 		savedRot = cam.transform.eulerAngles;
 
-		cam.transform.position = container.PoV.position;
-		cam.transform.eulerAngles = container.PoV.eulerAngles;
+		if (container.PoV)
+		{
+			cam.transform.position = container.PoV.position;
+			cam.transform.eulerAngles = container.PoV.eulerAngles;
+		}
 	}
 
 	void CloseUI()

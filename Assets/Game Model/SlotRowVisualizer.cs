@@ -1,4 +1,5 @@
 // SlotRowVisualizer.cs
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,6 +38,26 @@ public class SlotRowVisualizer : MonoBehaviour
 	void Update()
 	{
 		if (autoRebuild) TryAutoRebuild(force: false);
+	}
+
+	void SetupSpawnedItem(GameObject go)
+	{
+		// Attach your pickup script (fields preserved)
+		var pickupScript = go.AddComponent<PickUp>();
+		pickupScript.MyItemType = GetStack().item;
+		pickupScript.StartingContainerIndex = slotIndex;
+
+		// Destroy all child-colliders; we only want to grab the whole object
+		var colliders = go.GetComponentsInChildren<Collider>(true);
+		for (int c = 0; c < colliders.Length; c++)
+		{
+			if (colliders[c].gameObject != go)
+				Destroy(colliders[c]);
+		}
+
+		// Mark so we can safely delete only our spawns
+		if (!go.TryGetComponent<SpawnedVisualMarker>(out _))
+			go.AddComponent<SpawnedVisualMarker>();
 	}
 
 	void TryAutoRebuild(bool force)
@@ -97,34 +118,12 @@ public class SlotRowVisualizer : MonoBehaviour
 
 			Vector3 localPos = new Vector3(xLocal, yLocal, zLocal);
 
-			var go = SafeInstantiate(stack.item.Prefab, contentRoot);
+			var go = Instantiate(stack.item.Prefab, contentRoot);
 			go.transform.localPosition = localPos;
 			go.transform.localEulerAngles = itemLocalEuler;
 			go.transform.localScale = itemLocalScale;
 
-			// Attach your pickup script (fields preserved)
-			var pickupScript = go.AddComponent<PickUp>();
-			pickupScript.MyItemType = stack.item;
-			pickupScript.StartingContainerIndex = slotIndex;
-
-			// Destroy all child-colliders; we only want to grab the whole object
-			var colliders = go.GetComponentsInChildren<Collider>(true);
-			for (int c = 0; c < colliders.Length; c++)
-			{
-				if (colliders[c].gameObject != go)
-#if UNITY_EDITOR
-					DestroyImmediate(colliders[c]);
-#else
-					Destroy(colliders[c]);
-#endif
-			}
-
-			// Ensure physics/interaction won’t mess with your scene preview
-			DisablePhysics(go);
-
-			// Mark so we can safely delete only our spawns
-			if (!go.TryGetComponent<SpawnedVisualMarker>(out _))
-				go.AddComponent<SpawnedVisualMarker>();
+			SetupSpawnedItem(go);
 		}
 	}
 
@@ -136,27 +135,7 @@ public class SlotRowVisualizer : MonoBehaviour
 		var markers = contentRoot.GetComponentsInChildren<SpawnedVisualMarker>(true);
 		for (int i = markers.Length - 1; i >= 0; i--)
 		{
-#if UNITY_EDITOR
-			if (!Application.isPlaying) DestroyImmediate(markers[i].gameObject);
-			else Destroy(markers[i].gameObject);
-#else
 			Destroy(markers[i].gameObject);
-#endif
 		}
-	}
-
-	static GameObject SafeInstantiate(GameObject prefab, Transform parent)
-	{
-#if UNITY_EDITOR
-		if (!Application.isPlaying)
-			return (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
-#endif
-		return Object.Instantiate(prefab, parent);
-	}
-
-	static void DisablePhysics(GameObject go)
-	{
-		var rb = go.GetComponent<Rigidbody>();
-		if (rb) { rb.isKinematic = true; rb.useGravity = false; }
 	}
 }
