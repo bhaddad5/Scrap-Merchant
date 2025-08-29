@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Arrowhead
   m_EditorClassIdentifier: 
   DisplayName: Arrowhead
-  Icon: {fileID: 21300000, guid: 8299f32e6bb4ae741b8da0ad2a1043b5, type: 3}
+  Icon: {fileID: 21300000, guid: 908b424d9481c98489acd78f40a7afa5, type: 3}
   Prefab: {fileID: 8638183852560990637, guid: 1b6bf6a1f07cb2f4b92f9f589f005ece, type: 3}
   MaxStack: 10

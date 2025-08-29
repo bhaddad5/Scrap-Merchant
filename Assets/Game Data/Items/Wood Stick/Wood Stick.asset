@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Wood Stick
   m_EditorClassIdentifier: 
   DisplayName: Wooden Stick
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 674c12b70a086ba459701aa1bdc66cc3, type: 3}
   Prefab: {fileID: 8272893456892026749, guid: b834d4326a87aab4bab50754363230fc, type: 3}
   MaxStack: 15

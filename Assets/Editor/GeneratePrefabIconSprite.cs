@@ -1,20 +1,21 @@
 // Editor/GeneratePrefabIconSprite.cs
-// Renders a transparent 256x256 icon for the selected prefab and imports it as a Sprite named {prefabName}-icn.png
+// Renders a transparent 256x256 sprite icon next to each selected prefab: {PrefabName}-icn.png
 using System.IO;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public static class GeneratePrefabIconSprite
 {
+	private const int TEX_SIZE = 256;
+	private const int CAPTURE_LAYER = 31; // private layer index (doesn't need to be named in Tags & Layers)
+
 	[MenuItem("Tools/Generate Prefab Icon Sprite (256x256)")]
 	public static void GenerateForSelection()
 	{
 		var objs = Selection.objects;
 		if (objs == null || objs.Length == 0)
 		{
-			EditorUtility.DisplayDialog("No Selection", "Select a prefab asset in the Project window.", "OK");
+			EditorUtility.DisplayDialog("No Selection", "Select one or more prefab assets in the Project window.", "OK");
 			return;
 		}
 
@@ -23,81 +24,102 @@ public static class GeneratePrefabIconSprite
 			var path = AssetDatabase.GetAssetPath(obj);
 			if (string.IsNullOrEmpty(path) || Path.GetExtension(path).ToLower() != ".prefab")
 			{
-				Debug.LogWarning($"Skipped: {obj.name} (not a prefab asset)");
+				Debug.LogWarning($"Skipped (not a prefab asset): {obj.name}");
 				continue;
 			}
 
-			try
-			{
-				GenerateForPrefabPath(path);
-			}
-			catch (System.Exception ex)
-			{
-				Debug.LogError($"Failed to generate icon for '{path}': {ex}");
-			}
+			try { GenerateForPrefabPath(path); }
+			catch (System.Exception ex) { Debug.LogError($"Failed to generate icon for '{path}': {ex}"); }
 		}
+	}
+
+	[MenuItem("Tools/Generate Prefab Icon Sprite (256x256)", true)]
+	private static bool ValidateGenerateForSelection()
+	{
+		if (Selection.objects == null) return false;
+		foreach (var obj in Selection.objects)
+		{
+			var path = AssetDatabase.GetAssetPath(obj);
+			if (!string.IsNullOrEmpty(path) && Path.GetExtension(path).ToLower() == ".prefab")
+				return true;
+		}
+		return false;
 	}
 
 	private static void GenerateForPrefabPath(string prefabAssetPath)
 	{
-		// Create a Preview Scene so we don't pollute the current scene.
-		var previewScene = EditorSceneManager.NewPreviewScene();
+		// Hidden root so we don't dirty the scene; will be destroyed immediately.
+		var root = new GameObject("__IconCaptureRoot__");
+		root.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
+
 		GameObject instance = null;
 		Camera cam = null;
-		Light keyLight = null;
+		Light key = null;
+
+		// Use a private layer so our camera only sees what we spawn here.
+		void SetLayerRecursive(GameObject go, int layer)
+		{
+			go.layer = layer;
+			foreach (Transform t in go.transform) SetLayerRecursive(t.gameObject, layer);
+		}
 
 		try
 		{
 			var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabAssetPath);
-			if (prefab == null)
-				throw new System.Exception("Could not load prefab at " + prefabAssetPath);
+			if (!prefab) throw new System.Exception("Prefab could not be loaded.");
 
-			// Instantiate into preview scene
 			instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-			SceneManager.MoveGameObjectToScene(instance, previewScene);
+			if (!instance) throw new System.Exception("Prefab instantiation failed.");
+
+			instance.transform.SetParent(root.transform, false);
 			instance.transform.position = Vector3.zero;
 			instance.transform.rotation = Quaternion.identity;
 
-			// Compute render bounds
-			var bounds = CalculateRenderableBounds(instance);
-			if (bounds.size == Vector3.zero)
-				bounds = new Bounds(Vector3.zero, Vector3.one * 0.5f); // fallback minimal bounds
+			SetLayerRecursive(instance, CAPTURE_LAYER);
 
-			// Camera setup (orthographic for consistent scale), 3/4 angle
-			cam = new GameObject("IconCam").AddComponent<Camera>();
-			SceneManager.MoveGameObjectToScene(cam.gameObject, previewScene);
+			// Compute bounds from renderers (Skinned + Mesh, etc.)
+			var bounds = CalculateBounds(instance);
+			if (bounds.size.sqrMagnitude <= Mathf.Epsilon)
+				bounds = new Bounds(Vector3.zero, Vector3.one * 0.5f);
+
+			// Camera (orthographic, transparent background)
+			var camGO = new GameObject("IconCam");
+			camGO.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
+			camGO.transform.SetParent(root.transform, false);
+
+			cam = camGO.AddComponent<Camera>();
 			cam.clearFlags = CameraClearFlags.SolidColor;
-			cam.backgroundColor = new Color(0, 0, 0, 0); // transparent
+			cam.backgroundColor = new Color(0, 0, 0, 0);
 			cam.orthographic = true;
 			cam.nearClipPlane = 0.01f;
 			cam.farClipPlane = 1000f;
 			cam.allowHDR = false;
 			cam.allowMSAA = false;
+			cam.cullingMask = 1 << CAPTURE_LAYER;
 
-			// Place camera
-			var size = bounds.extents;
-			float halfMax = Mathf.Max(size.x, size.y, size.z);
-			cam.orthographicSize = halfMax * 1.2f; // padding
-			Vector3 viewDir = (new Vector3(1f, 1f, -1f)).normalized; // nice 3/4 view
-			float dist = halfMax * 4f; // ensure in front
-			cam.transform.position = bounds.center - viewDir * dist;
-			cam.transform.rotation = Quaternion.LookRotation(viewDir, Vector3.up);
+			float halfMax = Mathf.Max(bounds.extents.x, bounds.extents.y, bounds.extents.z);
+			cam.orthographicSize = halfMax * 1.2f;
 
-			// Simple key light to avoid flat shading
-			keyLight = new GameObject("KeyLight").AddComponent<Light>();
-			SceneManager.MoveGameObjectToScene(keyLight.gameObject, previewScene);
-			keyLight.type = LightType.Directional;
-			keyLight.intensity = 1.2f;
-			keyLight.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+			// Camera looks straight down from above
+			cam.transform.position = bounds.center + Vector3.up * (halfMax * 4f);
+			cam.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
-			// Set layer to Default so camera sees it
-			SetLayerRecursive(instance, 0);
-			cam.cullingMask = 1 << 0;
+			// Rotate the prefab 45° around Y for isometric style
+			instance.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
 
-			// Render to RT
-			const int TEX_SIZE = 256;
-			var rt = new RenderTexture(TEX_SIZE, TEX_SIZE, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-			rt.antiAliasing = 1;
+			// Simple directional light (shadows off to avoid artifacts)
+			var lightGO = new GameObject("KeyLight");
+			lightGO.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
+			lightGO.transform.SetParent(root.transform, false);
+			key = lightGO.AddComponent<Light>();
+			key.type = LightType.Directional;
+			key.intensity = 1.2f;
+			key.shadows = LightShadows.None;
+			key.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+
+			// Render
+			var rt = new RenderTexture(TEX_SIZE, TEX_SIZE, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+			{ antiAliasing = 1 };
 			var prevActive = RenderTexture.active;
 			var prevTarget = cam.targetTexture;
 
@@ -107,6 +129,9 @@ public static class GeneratePrefabIconSprite
 				cam.targetTexture = rt;
 				RenderTexture.active = rt;
 				GL.Clear(true, true, new Color(0, 0, 0, 0));
+
+				// In URP/HDRP, Camera.Render is okay for a simple offscreen pass in-editor.
+				// If you still get blanks, see notes below to switch to Handles.DrawCamera.
 				cam.Render();
 
 				tex = new Texture2D(TEX_SIZE, TEX_SIZE, TextureFormat.RGBA32, false, false);
@@ -121,109 +146,63 @@ public static class GeneratePrefabIconSprite
 				Object.DestroyImmediate(rt);
 			}
 
-			// Write PNG next to prefab
+			// Save next to prefab
 			var dir = Path.GetDirectoryName(prefabAssetPath).Replace("\\", "/");
 			var baseName = Path.GetFileNameWithoutExtension(prefabAssetPath);
 			var pngPath = $"{dir}/{baseName}-icn.png";
-
-			var pngBytes = ImageConversion.EncodeToPNG(tex);
-			File.WriteAllBytes(pngPath, pngBytes);
+			File.WriteAllBytes(pngPath, ImageConversion.EncodeToPNG(tex));
 			Object.DestroyImmediate(tex);
 
 			AssetDatabase.ImportAsset(pngPath, ImportAssetOptions.ForceUpdate);
 
-			// Set importer to Sprite with transparency
-			var importer = AssetImporter.GetAtPath(pngPath) as TextureImporter;
-			if (importer != null)
+			// Import as Sprite
+			var ti = (TextureImporter)AssetImporter.GetAtPath(pngPath);
+			if (ti != null)
 			{
-				importer.textureType = TextureImporterType.Sprite;
-				importer.spriteImportMode = SpriteImportMode.Single;
-				importer.alphaIsTransparency = true;
-				importer.mipmapEnabled = false;
-				importer.sRGBTexture = true;
-				importer.filterMode = FilterMode.Bilinear;
-				importer.textureCompression = TextureImporterCompression.Uncompressed; // icons look crisp
-				importer.spritePixelsPerUnit = 256; // 1 unit == full icon; tweak if desired
+				ti.textureType = TextureImporterType.Sprite;
+				ti.spriteImportMode = SpriteImportMode.Single;
+				ti.alphaIsTransparency = true;
+				ti.mipmapEnabled = false;
+				ti.textureCompression = TextureImporterCompression.Uncompressed;
+				ti.filterMode = FilterMode.Bilinear;
+				ti.sRGBTexture = true;
 #if UNITY_2022_1_OR_NEWER
-				importer.alphaSource = TextureImporterAlphaSource.FromInput;
+				ti.alphaSource = TextureImporterAlphaSource.FromInput;
 #endif
-				EditorUtility.SetDirty(importer);
-				importer.SaveAndReimport();
+				ti.spritePixelsPerUnit = TEX_SIZE; // 1 unit == full icon
+				ti.SaveAndReimport();
 			}
 
 			Debug.Log($"Generated icon sprite: {pngPath}");
 		}
 		finally
 		{
-			// Cleanup preview scene objects
-			if (cam) Object.DestroyImmediate(cam.gameObject);
-			if (keyLight) Object.DestroyImmediate(keyLight.gameObject);
-			if (instance) Object.DestroyImmediate(instance);
-			EditorSceneManager.ClosePreviewScene(previewScene);
+			if (root) Object.DestroyImmediate(root);
 		}
 	}
 
-	private static Bounds CalculateRenderableBounds(GameObject root)
+	private static Bounds CalculateBounds(GameObject go)
 	{
-		var renderers = root.GetComponentsInChildren<Renderer>();
-		Bounds b = new Bounds(root.transform.position, Vector3.zero);
-		bool hasRenderer = false;
-
+		var renderers = go.GetComponentsInChildren<Renderer>(true);
+		Bounds b = new Bounds(go.transform.position, Vector3.zero);
+		bool has = false;
 		foreach (var r in renderers)
 		{
-			if (!hasRenderer)
-			{
-				b = r.bounds;
-				hasRenderer = true;
-			}
-			else
-			{
-				b.Encapsulate(r.bounds);
-			}
+			// Skip non-visible or disabled renderers
+			if (!r.enabled) continue;
+			if (!has) { b = r.bounds; has = true; } else b.Encapsulate(r.bounds);
 		}
 
-		// Fallback to colliders if no renderers
-		if (!hasRenderer)
+		if (!has)
 		{
-			var colliders = root.GetComponentsInChildren<Collider>();
+			var colliders = go.GetComponentsInChildren<Collider>(true);
 			foreach (var c in colliders)
 			{
-				if (!hasRenderer)
-				{
-					b = c.bounds;
-					hasRenderer = true;
-				}
-				else
-				{
-					b.Encapsulate(c.bounds);
-				}
+				if (!has) { b = c.bounds; has = true; } else b.Encapsulate(c.bounds);
 			}
 		}
 
-		// As a final guard, ensure non-zero size
-		if (!hasRenderer)
-			b = new Bounds(Vector3.zero, Vector3.one * 0.5f);
-
+		if (!has) b = new Bounds(Vector3.zero, Vector3.one * 0.5f);
 		return b;
-	}
-
-	private static void SetLayerRecursive(GameObject go, int layer)
-	{
-		go.layer = layer;
-		foreach (Transform t in go.transform)
-			SetLayerRecursive(t.gameObject, layer);
-	}
-
-	[MenuItem("Tools/Generate Prefab Icon Sprite (256x256)", true)]
-	private static bool ValidateGenerateForSelection()
-	{
-		if (Selection.objects == null || Selection.objects.Length == 0) return false;
-		foreach (var obj in Selection.objects)
-		{
-			var path = AssetDatabase.GetAssetPath(obj);
-			if (!string.IsNullOrEmpty(path) && Path.GetExtension(path).ToLower() == ".prefab")
-				return true;
-		}
-		return false;
 	}
 }

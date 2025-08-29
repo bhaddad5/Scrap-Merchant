@@ -29,6 +29,8 @@ public class SlotRowVisualizer : MonoBehaviour
 	Item _prevItem;
 	int _prevCount;
 
+	List<GameObject> spawnedItems = new List<GameObject>();
+
 	void OnEnable()
 	{
 		if (!contentRoot) contentRoot = transform;
@@ -38,26 +40,6 @@ public class SlotRowVisualizer : MonoBehaviour
 	void Update()
 	{
 		if (autoRebuild) TryAutoRebuild(force: false);
-	}
-
-	void SetupSpawnedItem(GameObject go)
-	{
-		// Attach your pickup script (fields preserved)
-		var pickupScript = go.AddComponent<PickUp>();
-		pickupScript.MyItemType = GetStack().item;
-		pickupScript.StartingContainerIndex = slotIndex;
-
-		// Destroy all child-colliders; we only want to grab the whole object
-		var colliders = go.GetComponentsInChildren<Collider>(true);
-		for (int c = 0; c < colliders.Length; c++)
-		{
-			if (colliders[c].gameObject != go)
-				Destroy(colliders[c]);
-		}
-
-		// Mark so we can safely delete only our spawns
-		if (!go.TryGetComponent<SpawnedVisualMarker>(out _))
-			go.AddComponent<SpawnedVisualMarker>();
 	}
 
 	void TryAutoRebuild(bool force)
@@ -78,64 +60,98 @@ public class SlotRowVisualizer : MonoBehaviour
 
 	public void Rebuild()
 	{
-		// Clear previously spawned visuals (only our marked ones)
 		ClearSpawned();
 
-		var stack = GetStack();
-
-		if (hideWhenEmpty && contentRoot) contentRoot.gameObject.SetActive(!stack.IsEmpty);
-		if (stack.IsEmpty || stack.item == null || stack.item.Prefab == null) return;
-
-		int maxStack = Mathf.Max(1, stack.item.MaxStack);
-		int count = Mathf.Max(0, stack.count);
-		if (count == 0) return;
-
-		// Fixed grid based on maxStack + maxRows so spacing is identical across ALL rows.
-		int rowsCap = Mathf.Max(1, maxRows);
-		int colsCap = Mathf.Max(1, Mathf.CeilToInt((float)maxStack / rowsCap));
-
-		// How many rows we actually use for this count
-		int rowsUsed = Mathf.Min(rowsCap, Mathf.CeilToInt((float)count / colsCap));
-
-		// Fixed horizontal step for the grid (edge -> edge across maxWidth)
-		float xStep = (colsCap > 1) ? (maxWidth / (colsCap - 1)) : 0f;
-
-		// Optional vertical centering of the USED rows around startLocalOffset.z
-		float baseZ = startLocalOffset.z;
-		if (centerRows && rowsUsed > 1)
-			baseZ -= (rowsUsed - 1) * rowOffset * 0.5f;
-
-		// Spawn items row-major using fixed columns so every row shares the same x-positions,
-		// and each row starts at the left edge (startLocalOffset.x).
-		for (int n = 0; n < count; n++)
+		for (int n = 0; n < GetStack().count; n++)
 		{
-			int row = n / colsCap;
-			int col = n % colsCap;
+			var go = Instantiate(GetStack().item.Prefab, contentRoot);
 
-			float xLocal = startLocalOffset.x + col * xStep;          // starts at left edge
-			float yLocal = startLocalOffset.y;
-			float zLocal = baseZ + row * rowOffset;
+			var placement = GetNextPlacementTransform();
 
-			Vector3 localPos = new Vector3(xLocal, yLocal, zLocal);
-
-			var go = Instantiate(stack.item.Prefab, contentRoot);
-			go.transform.localPosition = localPos;
-			go.transform.localEulerAngles = itemLocalEuler;
-			go.transform.localScale = itemLocalScale;
+			go.transform.localPosition = placement.localPosition;
+			go.transform.localEulerAngles = placement.localEuler;
+			go.transform.localScale = placement.localScale;
 
 			SetupSpawnedItem(go);
 		}
+	}
+
+	void SetupSpawnedItem(GameObject go)
+	{
+		// Attach your pickup script (fields preserved)
+		var pickupScript = go.AddComponent<PickUp>();
+		pickupScript.MyItemType = GetStack().item;
+		pickupScript.StartingContainerIndex = slotIndex;
+
+		// Destroy all child-colliders; we only want to grab the whole object
+		var colliders = go.GetComponentsInChildren<Collider>(true);
+		for (int c = 0; c < colliders.Length; c++)
+		{
+			if (colliders[c].gameObject != go)
+				Destroy(colliders[c]);
+		}
+
+		spawnedItems.Add(go);
 	}
 
 	void ClearSpawned()
 	{
 		if (!contentRoot) return;
 
-		// Destroy only children we spawned (have marker)
-		var markers = contentRoot.GetComponentsInChildren<SpawnedVisualMarker>(true);
-		for (int i = markers.Length - 1; i >= 0; i--)
+		foreach(var item in spawnedItems)
 		{
-			Destroy(markers[i].gameObject);
+			GameObject.Destroy(item);
 		}
+		spawnedItems.Clear();
 	}
+
+	/// <summary>
+	/// Computes the local transform (position, euler, scale) where the next item
+	/// will be placed, based on current layout settings and spawnedItems.Count.
+	/// Does not instantiate or modify the scene.
+	/// </summary>
+	public (Vector3 localPosition, Vector3 localEuler, Vector3 localScale) GetNextPlacementTransform()
+	{
+		// Ensure we have a content root
+		if (!contentRoot) contentRoot = transform;
+
+		// Read the stack to determine maxStack/columns like Rebuild()
+		var stack = GetStack();
+		int maxStack = 1;
+		if (stack.item != null)
+			maxStack = Mathf.Max(1, stack.item.MaxStack);
+
+		int rowsCap = Mathf.Max(1, maxRows);
+		int colsCap = Mathf.Max(1, Mathf.CeilToInt((float)maxStack / rowsCap));
+
+		// Which index are we placing next?
+		int n = Mathf.Max(0, spawnedItems.Count);
+
+		// Rows used after placing the next item (affects centering)
+		int countIfPlaced = n + 1;
+		int rowsUsed = Mathf.Min(rowsCap, Mathf.CeilToInt((float)countIfPlaced / colsCap));
+
+		// Horizontal spacing across the full maxWidth (fixed by colsCap)
+		float xStep = (colsCap > 1) ? (maxWidth / (colsCap - 1)) : 0f;
+
+		// Base Z with optional centering of the USED rows
+		float baseZ = startLocalOffset.z;
+		if (centerRows && rowsUsed > 1)
+			baseZ -= (rowsUsed - 1) * rowOffset * 0.5f;
+
+		// Row/column for this next index (row-major)
+		int row = n / colsCap;
+		int col = n % colsCap;
+
+		// Local position (each row starts at left edge = startLocalOffset.x)
+		float xLocal = startLocalOffset.x + col * xStep;
+		float yLocal = startLocalOffset.y;
+		float zLocal = baseZ + row * rowOffset;
+
+		Vector3 localPos = new Vector3(xLocal, yLocal, zLocal);
+
+		// Orientation & scale come from the class settings
+		return (localPos, itemLocalEuler, itemLocalScale);
+	}
+
 }
